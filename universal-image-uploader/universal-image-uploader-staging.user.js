@@ -29,6 +29,7 @@
 // @connect              i.111666.best
 // @connect              skyimg.net
 // @connect              api.stardots.io
+// @connect              image.fatcattech.cn
 // @grant                GM.info
 // @grant                GM.addValueChangeListener
 // @grant                GM.getValue
@@ -782,6 +783,7 @@
       host_skyimg: 'Skyimg',
       host_skyimg_webp: 'Skyimg (WebP)',
       host_stardots: 'StarDots',
+      host_fatcattech: 'FatCat',
       btn_select_images: 'Select images',
       progress_initial: 'Done 0/0',
       progress_done: 'Done {done}/{total}',
@@ -870,6 +872,7 @@
       host_skyimg: 'Skyimg',
       host_skyimg_webp: 'Skyimg (WebP)',
       host_stardots: 'StarDots',
+      host_fatcattech: '\u80A5\u55B5 \u{1F1E8}\u{1F1F3}',
       btn_select_images: '\u9009\u62E9\u56FE\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -960,6 +963,7 @@
       host_skyimg: 'Skyimg',
       host_skyimg_webp: 'Skyimg (WebP)',
       host_stardots: 'StarDots',
+      host_fatcattech: '\u80A5\u55B5 \u{1F1E8}\u{1F1F3}',
       btn_select_images: '\u9078\u64C7\u5716\u7247',
       progress_initial: '\u5B8C\u6210 0/0',
       progress_done: '\u5B8C\u6210 {done}/{total}',
@@ -1062,6 +1066,7 @@
         'skyimg_webp',
         'photo_lily',
         '111666_best',
+        'fatcattech',
         'stardots',
         'mock',
         'mock2',
@@ -1076,6 +1081,7 @@
         'skyimg_webp',
         'photo_lily',
         '111666_best',
+        'fatcattech',
         'stardots',
       ]
   var ALLOWED_PROXIES = ['none', 'wsrv.nl', 'duckduckgo', 'wsrv.nl-duckduckgo']
@@ -2441,6 +2447,27 @@
       throw new Error(t('error_upload_failed'))
     }
   }
+  var FATCAT_UPLOAD_ENDPOINT = 'https://image.fatcattech.cn/api/index.php'
+  async function uploadToFatcattech(file) {
+    if (Math.floor(file.size / 1e3) > 3e4) {
+      throw new Error('30mb limit')
+    }
+    const formData = new FormData()
+    formData.append('image', file)
+    const data = await gmRequest({
+      method: 'POST',
+      url: FATCAT_UPLOAD_ENDPOINT,
+      data: formData,
+      responseType: 'json',
+    })
+    if (
+      (data == null ? void 0 : data.code) === 200 &&
+      (data == null ? void 0 : data.url)
+    ) {
+      return String(data.url)
+    }
+    throw new Error(t('error_upload_failed'))
+  }
   async function uploadImageToHost(file, host) {
     if (host === 'mock' || host === 'mock2') {
       await new Promise((resolve) => {
@@ -2464,6 +2491,7 @@
     if (host === 'photo_lily') return uploadToPhotoLily(file)
     if (host === '111666_best') return uploadTo111666Best(file)
     if (host === 'stardots') return uploadToStarDots(file)
+    if (host === 'fatcattech') return uploadToFatcattech(file)
     return uploadToImgur(file)
   }
   var lastEditableEl

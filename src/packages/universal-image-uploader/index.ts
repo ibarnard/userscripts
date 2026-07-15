@@ -1346,6 +1346,28 @@ async function uploadToStarDots(file) {
   }
 }
 
+// https://image.fatcattech.cn — EasyImages 2.0 based, guest upload (no token)
+const FATCAT_UPLOAD_ENDPOINT = 'https://image.fatcattech.cn/api/index.php'
+async function uploadToFatcattech(file) {
+  if (Math.floor(file.size / 1000) > 30_000) {
+    throw new Error('30mb limit')
+  }
+
+  const formData = new FormData()
+  formData.append('image', file)
+  const data = await gmRequest({
+    method: 'POST',
+    url: FATCAT_UPLOAD_ENDPOINT,
+    data: formData,
+    responseType: 'json',
+  })
+  if (data?.code === 200 && data?.url) {
+    return String(data.url)
+  }
+
+  throw new Error(t('error_upload_failed'))
+}
+
 async function uploadImageToHost(file, host: string) {
   if (host === 'mock' || host === 'mock2') {
     await new Promise((resolve) => {
@@ -1370,6 +1392,7 @@ async function uploadImageToHost(file, host: string) {
   if (host === 'photo_lily') return uploadToPhotoLily(file)
   if (host === '111666_best') return uploadTo111666Best(file)
   if (host === 'stardots') return uploadToStarDots(file)
+  if (host === 'fatcattech') return uploadToFatcattech(file)
   // Default
   return uploadToImgur(file)
 }

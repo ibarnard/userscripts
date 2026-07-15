@@ -29,5 +29,6 @@
 // @connect              i.111666.best
 // @connect              skyimg.net
 // @connect              api.stardots.io
+// @connect              image.fatcattech.cn
 // ==/UserScript==
 //
